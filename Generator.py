@@ -41,10 +41,10 @@ class GeneratorClass:
         self.__constructor += str(new_attributes).replace("'", "").replace("[", '').replace("]", '')
         self.__constructor += '):\n'
         for i in new_attributes:
-            self.__constructor += f'\t\tself.__{i} = {i}\n'
+            self.__constructor += f'\t\tself.{i} = {i}\n'
 
     def get_class_prop(self):
-        return self.__constructor + '\n' + self.__get_and_set
+        return self.__constructor + self.__get_and_set
 
     def write_on_file(self):
         f = open(f'{self.__name}.py', 'w')
