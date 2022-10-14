@@ -1,24 +1,33 @@
-import pyperclip
+from typing import List
 
 
 class GeneratorClass:
-    def __init__(self):
-        self.__constructor = ""
-        self.__get_and_set = ""
+    def __init__(self, name: str, new_attributes: List[str]):
+        self.__name = name
+        self.get_and_set = new_attributes
+        self.constructor = new_attributes
+
+    @property
+    def name(self):
+        return self.__name
+
+    @name.setter
+    def name(self, new_name):
+        self.__name = new_name
 
     @property
     def get_and_set(self):
         return self.__get_and_set
 
     @get_and_set.setter
-    def get_and_set(self, new_attributes: list[str]):
+    def get_and_set(self, new_attributes: List[str]):
         self.__get_and_set = ''
         for i in new_attributes:
             self.__get_and_set += f'\t@property\n' \
                                   f'\tdef {i}(self):\n' \
                                   f'\t\treturn self.__{i}\n\n' \
                                   f'\t@{i}.setter\n' \
-                                  f'\tdef {i}(self,new_{i}):\n' \
+                                  f'\tdef {i}(self, new_{i}):\n' \
                                   f'\t\tself.__{i} = new_{i}\n\n'
 
     @property
@@ -26,26 +35,38 @@ class GeneratorClass:
         return self.__constructor
 
     @constructor.setter
-    def constructor(self, new_attributes: list[str]):
-        self.__constructor = "\tdef __init__(self,"
+    def constructor(self, new_attributes: List[str]):
+        self.__constructor = f"class {self.__name}:\n" \
+                             "\tdef __init__(self, "
         self.__constructor += str(new_attributes).replace("'", "").replace("[", '').replace("]", '')
         self.__constructor += '):\n'
+        for i in new_attributes:
+            self.__constructor += f'\t\tself.__{i} = {i}\n'
 
     def get_class_prop(self):
-        return self.__constructor + self.__get_and_set
+        return self.__constructor + '\n' + self.__get_and_set
+
+    def write_on_file(self):
+        f = open(f'{self.__name}.py', 'w')
+        f.write(self.get_class_prop())
+        f.close()
 
 
-try:
-    attributes = input('Insira o nome das propriedades separados por ",": \n').replace(" ", '').lower().split(',')
-    # atributos da classe
+def main():
+    try:
+        name = input("Qual o nome da sua classe? ").replace(" ", '')
+        attributes = input('Insira o nome das propriedades separados por ",": \n').replace(" ", '').lower().split(',')
+        # atributos da classe
 
-    generator = GeneratorClass()
-    generator.constructor = attributes
-    generator.get_and_set = attributes
-    pyperclip.copy(generator.get_class_prop())
+        generator = GeneratorClass(name, attributes)
+        generator.write_on_file()
 
-    print("Seja Feliz!\n O seus atributos e setters estão no no seu CTRL + V")
-    input("Pressione Enter para sair")
-except Exception as e:
-    print(e)
-    input()
+        print("Seja Feliz!\n A sua class foi criada, basta arrastar para os seus arquivos e dar import")
+        input("Pressione Enter para sair")
+    except Exception as e:
+        print(e)
+        input()
+
+
+if __name__ == "__main__":
+    main()
